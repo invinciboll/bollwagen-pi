@@ -1,11 +1,16 @@
 from guizero import App, Window, PushButton, Box, Picture, Slider, Text, Drawing
 from colormap import rgb2hex
-from gpiozero import PWMLED, LED
+import RPi.GPIO as GPIO
+from gpiozero import PWMLED
 
 app = App(title="bollwagen", bg="black", layout="grid")
 
-
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
 path = '/home/pi/Desktop/bw/'
+
+led = PWMLED(17)
+
 ###########################################################################################################################################
 ### Toggle Buttons ########################################################################################################################
 
@@ -15,30 +20,38 @@ class tButton:
         self.index = index
         self.image = image
         self.grid = grid
-        self.led = LED(gpio)
-        
-        self.generateTileButton()
+        self.gpio = gpio
 
-    def toggle(self):
-        self.led.toggle()
-        if(self.led.is_active):
-            self.button.image = path + self.image+'_on.png'
-        else: 
-            self.button.image = path + self.image+'_off.png'
 
-    def generateTileButton(self):
-        self.button = PushButton(app, command=self.toggle,
-                                         grid=self.grid, align='left', image=path + self.image+'_off.png')
+def general_callback(n):
+    print('general_callback()', n)
+    if GPIO.input(toggleButtons[n].gpio) == 0:
+        led.value = 0.8
+        toggle_pushButtons[n].image = toggleButtons[n].image+'_on.png'
+        GPIO.output(toggleButtons[n].gpio, GPIO.HIGH)
+    else:
+        led.value = 0.3
+        toggle_pushButtons[n].image = toggleButtons[n].image+'_off.png'
+        GPIO.output(toggleButtons[n].gpio, GPIO.LOW)
 
 
 toggleButtons = []
 # index,image,grid,gpio
-toggleButtons.append(tButton(0, 'sign', [0, 0], 14))
-toggleButtons.append(tButton(1, 'outside', [1, 0], 15))
-toggleButtons.append(tButton(2, 'shots', [0, 1], 16))
+toggleButtons.append(tButton(0, 'sign', [0, 0], 40))
+toggleButtons.append(tButton(1, 'outside', [1, 0], 38))
+toggleButtons.append(tButton(2, 'shots', [0, 1], 36))
+
+toggle_pushButtons = []
+for tButton in toggleButtons:
+    GPIO.setup(tButton.gpio, GPIO.OUT)
+    GPIO.output(tButton.gpio, GPIO.LOW)
+    toggle_pushButtons.append(PushButton(app, args=[tButton.index], command=general_callback,
+                                         grid=tButton.grid, align='left', image=path + tButton.image+'_off.png'))
 
 ###########################################################################################################################################
 ### Menu Buttons ##########################################################################################################################
+
+
 class mTile:
     def __init__(self, index, image, grid):
         self.index = index
@@ -76,12 +89,8 @@ class mTileLed(mTile):
     g = 0,
     b = 0,
 
-    def __init__(self, index, image, grid, gpioR, gpioG, gpioB):
+    def __init__(self, index, image, grid):
         super().__init__(index, image, grid)
-        self.ledR = PWMLED(gpioR)
-        self.ledG = PWMLED(gpioG)
-        self.ledB = PWMLED(gpioB)
-
         self.generateDrawing()
         self.generateSliders()
 
@@ -97,18 +106,14 @@ class mTileLed(mTile):
             self.button.image = self.image + "_off.png"
 
     def sliderRedChanged(self, n):
-        self.ledR.value = int(n)/255
-        print(self.ledR.value)
         self.r = int(n)
         self.drawColor()
 
     def sliderGreenChanged(self, n):
-        self.ledG.value = int(n)/255
         self.g = int(n)
         self.drawColor()
 
     def sliderBlueChanged(self, n):
-        self.ledB.value = int(n)/255
         self.b = int(n)
         self.drawColor()
 
@@ -129,9 +134,9 @@ class mTileLed(mTile):
 menuTiles = []
 
 #index, image, grid
-menuTiles.append(mTileLed(0, 'ambient', [1, 1], 3, 5 ,7 ))
+menuTiles.append(mTileLed(0, 'ambient', [1, 1]))
 menuTiles.append(mTile(1, 'effect', [0, 2]))
-menuTiles.append(mTile(2, 'logo', [1, 2]))
+menuTiles.append(mTileLed(2, 'logo', [1, 2]))
 menuTiles.append(mTile(3, 'vent', [0, 3]))
 menuTiles.append(mTile(4, 'money', [1, 3]))
 
