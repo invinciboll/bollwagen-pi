@@ -3,9 +3,12 @@ from colormap import rgb2hex
 from gpiozero import PWMLED, LED
 from abc import ABC, abstractmethod
 from repository import Database
+from rfid import Reader
+import time
 
 app = App(title="bollwagen", bg="black", layout="grid")
 db = Database("database.db")
+rfid = Reader()
 path = '/home/pi/Desktop/bw/'
 
 
@@ -150,6 +153,7 @@ class mTileMoney(mTile):
         self.generateCardWindow()
         self.generateCardWindowComponents()
         self.generatePayWindowComponents()
+        self.generateBalanceWindow()
         self.generateMenu()
 
     def updateDisplayedSums(self):
@@ -181,8 +185,42 @@ class mTileMoney(mTile):
     def closePayWindow(self):
         self.hookahSum = 0
         self.drinkSum = 0
-        self.total = 0
+        self.updateDisplayedSums()
         self.payWindow.hide()
+
+    def generateBalanceWindow(self):
+        self.balanceWindow = Window(self.payWindow, bg="black", visible=False)
+        self.balanceWindow.tk.attributes("-fullscreen", True)
+        self.balanceWindow.tk.config(cursor='none')
+        
+        self.bWPicture = Picture(
+            self.balanceWindow, image=self.image + '_off.png', align="top")
+
+        self.bWText = Text(
+            self.balanceWindow, text="Bitte Karte auflegen", align="top")
+        self.bWText.text_color = "white"
+        self.bWText.text_size = self.CONST_FONT_SIZE
+        
+        self.bWMasterBox = Box(self.balanceWindow, width="fill", align="top", border=self.CONST_SHOW_BORDER)
+        self.bWTotal = Text(self.bWMasterBox)
+        self.bWTotal.text_color = "white"
+        self.bWTotal.text_size = self.CONST_FONT_SIZE 
+
+        self.bWScanButton = PushButton(
+            self.balanceWindow, command=self.startBalanceScan, text="Scan", height=4, width="fill", align="top")
+        self.bWScanButton.text_color = "white"
+
+        self.bWCancleButton = PushButton(
+            self.balanceWindow, command=self.balanceWindow.hide, text="Abbrechen", height=4, width="fill", align="bottom")
+        self.bWCancleButton.text_color = "white"
+
+    def startBalanceScan(self):
+        sn = rfid.getId()
+        print(sn)
+        bl = db.getBalance(sn)
+        print(bl)
+        self.bWTotal.value = bl
+
 
     def generateCardWindow(self):
         self.pCardWindow = Window(self.payWindow, bg="black", visible=False)
@@ -190,21 +228,22 @@ class mTileMoney(mTile):
         self.pCardWindow.tk.config(cursor='none')
 
     def generateCardWindowComponents(self):
-        self.payWindowPicture = Picture(
-            self.pCardWindow, image=self.image + '_off.png')
+        self.pCWPicture = Picture(
+            self.pCardWindow, image=self.image + '_off.png', align="top")
 
-        self.pCWTotal = Text(self.pCardWindow, text=self.total)
+        self.pCWMasterBox = Box(self.pCardWindow, width="fill", align="top", border=self.CONST_SHOW_BORDER)
+        self.pCWTotal = Text(self.pCWMasterBox, text=self.total)
         self.pCWTotal.text_color = "white"
-        self.pCWTotal.text_size = "24"
+        self.pCWTotal.text_size = self.CONST_FONT_SIZE 
 
         self.pCWText = Text(
             self.pCardWindow, text="Bitte Karte auflegen", align="top")
         self.pCWText.text_color = "white"
-        self.pCWText.text_size = "24"
+        self.pCWText.text_size = self.CONST_FONT_SIZE 
 
-        self.pCardWindowCancleButton = PushButton(
+        self.pCWCancleButton = PushButton(
             self.pCardWindow, command=self.pCardWindow.hide, text="Abbrechen", height=4, width="fill", align="bottom")
-        self.pCardWindowCancleButton.text_color = "white"
+        self.pCWCancleButton.text_color = "white"
 
     def generatePayWindow(self):
         self.payWindow = Window(self.window, bg="black", visible=False)
@@ -215,9 +254,9 @@ class mTileMoney(mTile):
         self.payWindowPicture = Picture(
             self.payWindow, image=self.image + '_off.png', align="top")
 
-
+        #---Box Layout---------------------------------------------------------------------------------------------------------------------
         self.masterBox = Box(self.payWindow, width="fill", align="top", border=self.CONST_SHOW_BORDER)
-        
+        #---Plus buttons
         self.buttonBoxPlus = Box(self.masterBox, align="right", layout="grid", border=self.CONST_SHOW_BORDER)
         self.pWBDButtonPlus = PushButton(self.buttonBoxPlus, command=self.addDrink, width=4, height=2, text="+", grid=[0,0])
         self.pWBDButtonPlus.text_color = "white"
@@ -225,7 +264,7 @@ class mTileMoney(mTile):
         self.pWBHButtonPlus = PushButton(self.buttonBoxPlus, command=self.addHookah, width=4, height=2, text="+", grid=[0,1])
         self.pWBHButtonPlus.text_color = "white" 
         self.pWBHButtonPlus.text_size = self.CONST_FONT_SIZE    
-
+        #---Sum labels 
         self.sumBox = Box(self.masterBox, align="right", layout="grid",border=self.CONST_SHOW_BORDER)
         self.pWBDSum = Text(self.sumBox,
                             text=self.drinkSum, grid=[0,0], color="white", width=4, height=3)
@@ -233,7 +272,7 @@ class mTileMoney(mTile):
         self.pWBHSum = Text(self.sumBox,
                             text=self.hookahSum, grid=[0,1], color="white", width=4, height=3)
         self.pWBHSum.text_size=self.CONST_FONT_SIZE   
-
+        #---Minus Buttons
         self.buttonBoxMinus = Box(self.masterBox, align="right", layout="grid",border=self.CONST_SHOW_BORDER)
         self.pWBDButtonMinus = PushButton(self.buttonBoxMinus, command=self.removeDrink, width=4, height=2, text="-", grid=[0,0])
         self.pWBDButtonMinus.text_color = "white"
@@ -241,13 +280,13 @@ class mTileMoney(mTile):
         self.pWBHButtonMinus = PushButton(self.buttonBoxMinus, command=self.removeHookah, width=4, height=2, text="-", grid=[0,1])
         self.pWBHButtonMinus.text_color = "white"
         self.pWBHButtonMinus.text_size = self.CONST_FONT_SIZE    
-        
+        #---Descriptive row labels
         self.labelBox = Box(self.masterBox, align="left", layout="grid",border=self.CONST_SHOW_BORDER)
         self.pWBDText = Text(self.labelBox,
                              text="Getränke", grid=[0,0], color="white",align="left", height=3, size=self.CONST_FONT_SIZE)
         self.pWBHText = Text(self.labelBox,
                              text="Shisha-Köpfe", grid=[0,1], color="white",align="left", height=3, size=self.CONST_FONT_SIZE)
-
+        #---Total section
         self.totalBox = Box(self.payWindow,width="fill", align="top",border=self.CONST_SHOW_BORDER)
         self.totalBoxLeft = Box(self.totalBox, align="left", layout="grid",border=self.CONST_SHOW_BORDER)
         self.pWBTText = Text(self.totalBoxLeft,
@@ -271,7 +310,7 @@ class mTileMoney(mTile):
         self.menuButtons.append(PushButton(
             self.window, command=self.payWindow.show, text="Bezahlen"))
         self.menuButtons.append(PushButton(
-            self.window, command=None, text="Kontostand"))
+            self.window, command=self.balanceWindow.show, text="Kontostand"))
         self.menuButtons.append(PushButton(
             self.window, command=None, text="Aufladen"))
         for button in self.menuButtons:
@@ -284,10 +323,10 @@ tiles = []
 tiles.append(tTile('sign', [0, 0], 14))
 tiles.append(tTile('outside', [1, 0], 15))
 tiles.append(tTile('shots', [0, 1], 16))
-tiles.append(mTileLed('ambient', [1, 1], 3, 5, 7))
+#tiles.append(mTileLed('ambient', [1, 1], 3, 5, 7))
 tiles.append(mTile('effect', [0, 2]))
 tiles.append(mTile('logo', [1, 2]))
-tiles.append(mTileVent('vent', [0, 3], 21))
+#tiles.append(mTileVent('vent', [0, 3], 21))
 tiles.append(mTileMoney('money', [1, 3]))
 
 ###########################################################################################################################################
@@ -298,6 +337,7 @@ def main():
     app.tk.attributes("-fullscreen", True)
     app.tk.config(cursor='none')
     app.display()
+    
 
 
 if __name__ == '__main__':

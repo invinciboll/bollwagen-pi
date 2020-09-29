@@ -1,12 +1,24 @@
 import sqlite3
 
-#c.execute("DROP TABLE Person")
-# c.execute("""CREATE TABLE Person (
-#        name TEXT NOT NULL,
-#        rfid TEXT,
-#        balance REAL DEFAULT 0.00
-#        )
-#    """)
+if False:
+    conn = sqlite3.connect("database.db")
+    c = conn.cursor()
+    
+    if False:
+        c.execute("DROP TABLE Person")
+        c.execute("""CREATE TABLE Person (
+            name TEXT NOT NULL,
+            rfid TEXT,
+            balance REAL DEFAULT 0.00
+            )
+        """)
+        c.execute("INSERT INTO Person VALUES ('Sebastian','1048046807727',19.75)")
+        conn.commit()
+    
+    if False:
+        c.execute("SELECT * FROM Person")
+        print(c.fetchall())
+        conn.commit()
 
 
 class Database:
