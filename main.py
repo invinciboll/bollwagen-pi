@@ -47,6 +47,8 @@ class tTile(Tile):
 
 ###########################################################################################################################################
 ### Menu Buttons ##########################################################################################################################
+
+
 class mTile(Tile):
     def __init__(self, image, grid):
         super().__init__(image, grid)
@@ -58,12 +60,6 @@ class mTile(Tile):
 
         self.wPicture = Picture(self.window, image=self.image + '_off.png')
 
-        # self.wButtonBox = Box(self.window, layout="auto",
-        #                      align="bottom", width="fill")
-        # self.wCancleButton = PushButton(self.wButtonBox, align="right",
-        #                                image=path + "cancle.png", text="Close", command=self.window.hide)
-        # self.wOkButton = PushButton(self.wButtonBox, align="right",
-        #                            image=path + "ok.png", text="Close", command=self.window.hide)
         self.wBackButton = PushButton(
             self.window, command=self.window.hide, text="Zurück", height=4, width="fill", align="bottom")
         self.wBackButton.text_color = "white"
@@ -145,6 +141,8 @@ class mTileMoney(mTile):
     total = 0
     CONST_DRINK_PRICE = 1
     CONST_HOOKAH_PRICE = 1.5
+    CONST_FONT_SIZE = 16
+    CONST_SHOW_BORDER = False
 
     def __init__(self, image, grid):
         super().__init__(image, grid)
@@ -157,27 +155,34 @@ class mTileMoney(mTile):
     def updateDisplayedSums(self):
         self.pWBDSum.value = self.drinkSum
         self.pWBHSum.value = self.hookahSum
-        self.total = self.hookahSum + self.drinkSum
+        self.total = self.hookahSum*self.CONST_HOOKAH_PRICE + \
+            self.drinkSum*self.CONST_DRINK_PRICE
         self.pWBTSum.value = self.total
         self.pCWTotal.value = self.total
 
     def addDrink(self):
-        self.drinkSum += self.CONST_DRINK_PRICE
+        self.drinkSum += 1
         self.updateDisplayedSums()
 
     def removeDrink(self):
-        if(self.drinkSum >= self.CONST_DRINK_PRICE):
-            self.drinkSum -= self.CONST_DRINK_PRICE
+        if(self.drinkSum > 0):
+            self.drinkSum -= 1
             self.updateDisplayedSums()
 
     def addHookah(self):
-        self.hookahSum += self.CONST_HOOKAH_PRICE
+        self.hookahSum += 1
         self.updateDisplayedSums()
 
     def removeHookah(self):
-        if(self.hookahSum >= self.CONST_HOOKAH_PRICE):
-            self.hookahSum -= self.CONST_HOOKAH_PRICE
+        if(self.hookahSum > 0):
+            self.hookahSum -= 1
             self.updateDisplayedSums()
+
+    def closePayWindow(self):
+        self.hookahSum = 0
+        self.drinkSum = 0
+        self.total = 0
+        self.payWindow.hide()
 
     def generateCardWindow(self):
         self.pCardWindow = Window(self.payWindow, bg="black", visible=False)
@@ -208,44 +213,53 @@ class mTileMoney(mTile):
 
     def generatePayWindowComponents(self):
         self.payWindowPicture = Picture(
-            self.payWindow, image=self.image + '_off.png')
+            self.payWindow, image=self.image + '_off.png', align="top")
 
-        self.payWindowBoxDrink = Box(self.payWindow, width="fill")
-        self.pWBDButtonPlus = PushButton(
-            self.payWindowBoxDrink, command=self.addDrink, width=4, height=2, text="+", align="right")
+
+        self.masterBox = Box(self.payWindow, width="fill", align="top", border=self.CONST_SHOW_BORDER)
+        
+        self.buttonBoxPlus = Box(self.masterBox, align="right", layout="grid", border=self.CONST_SHOW_BORDER)
+        self.pWBDButtonPlus = PushButton(self.buttonBoxPlus, command=self.addDrink, width=4, height=2, text="+", grid=[0,0])
         self.pWBDButtonPlus.text_color = "white"
-        self.pWBDButtonMinus = PushButton(
-            self.payWindowBoxDrink, command=self.removeDrink, width=4, height=2, text="-", align="right")
+        self.pWBDButtonPlus.text_size = self.CONST_FONT_SIZE
+        self.pWBHButtonPlus = PushButton(self.buttonBoxPlus, command=self.addHookah, width=4, height=2, text="+", grid=[0,1])
+        self.pWBHButtonPlus.text_color = "white" 
+        self.pWBHButtonPlus.text_size = self.CONST_FONT_SIZE    
+
+        self.sumBox = Box(self.masterBox, align="right", layout="grid",border=self.CONST_SHOW_BORDER)
+        self.pWBDSum = Text(self.sumBox,
+                            text=self.drinkSum, grid=[0,0], color="white", width=4, height=3)
+        self.pWBDSum.text_size=self.CONST_FONT_SIZE   
+        self.pWBHSum = Text(self.sumBox,
+                            text=self.hookahSum, grid=[0,1], color="white", width=4, height=3)
+        self.pWBHSum.text_size=self.CONST_FONT_SIZE   
+
+        self.buttonBoxMinus = Box(self.masterBox, align="right", layout="grid",border=self.CONST_SHOW_BORDER)
+        self.pWBDButtonMinus = PushButton(self.buttonBoxMinus, command=self.removeDrink, width=4, height=2, text="-", grid=[0,0])
         self.pWBDButtonMinus.text_color = "white"
-        self.pWBDSum = Text(self.payWindowBoxDrink,
-                            text=self.drinkSum, align="right", color="white")
-        self.pWBDSpacer = Text(self.payWindowBoxDrink,
-                               text="Anzahl: ", align="right", color="white")
-        self.pWBDText = Text(self.payWindowBoxDrink,
-                             text="Getränke", align="left", color="white")
-
-        self.payWindowBoxHookah = Box(self.payWindow, width="fill")
-        self.pWBHButtonPlus = PushButton(
-            self.payWindowBoxHookah, command=self.addHookah, width=4, height=2, text="+", align="right")
-        self.pWBHButtonPlus.text_color = "white"
-        self.pWBHButtonMinus = PushButton(
-            self.payWindowBoxHookah, command=self.removeHookah, width=4, height=2, text="-", align="right")
+        self.pWBDButtonMinus.text_size = self.CONST_FONT_SIZE   
+        self.pWBHButtonMinus = PushButton(self.buttonBoxMinus, command=self.removeHookah, width=4, height=2, text="-", grid=[0,1])
         self.pWBHButtonMinus.text_color = "white"
-        self.pWBHSum = Text(self.payWindowBoxHookah,
-                            text=self.hookahSum, align="right", color="white")
-        self.pWBHSpacer = Text(self.payWindowBoxHookah,
-                               text="Anzahl: ", align="right", color="white")
-        self.pWBHText = Text(self.payWindowBoxHookah,
-                             text="Shisha-Köpfe", align="left", color="white")
+        self.pWBHButtonMinus.text_size = self.CONST_FONT_SIZE    
+        
+        self.labelBox = Box(self.masterBox, align="left", layout="grid",border=self.CONST_SHOW_BORDER)
+        self.pWBDText = Text(self.labelBox,
+                             text="Getränke", grid=[0,0], color="white",align="left", height=3, size=self.CONST_FONT_SIZE)
+        self.pWBHText = Text(self.labelBox,
+                             text="Shisha-Köpfe", grid=[0,1], color="white",align="left", height=3, size=self.CONST_FONT_SIZE)
 
-        self.payWindowBoxTotal = Box(self.payWindow, width="fill")
-        self.pWBTSum = Text(self.payWindowBoxTotal, text=(
-            self.hookahSum+self.drinkSum), align="right", color="white")
-        self.pWBTText = Text(self.payWindowBoxTotal,
-                             text="Total:", align="left", color="white")
+        self.totalBox = Box(self.payWindow,width="fill", align="top",border=self.CONST_SHOW_BORDER)
+        self.totalBoxLeft = Box(self.totalBox, align="left", layout="grid",border=self.CONST_SHOW_BORDER)
+        self.pWBTText = Text(self.totalBoxLeft,
+                             text="Total:", color="white",grid=[0,0],width=4, height=3, size=self.CONST_FONT_SIZE)
+        self.totalBoxRight = Box(self.totalBox, align="right", layout="grid",border=self.CONST_SHOW_BORDER)
+        self.pWBTEuro = Text(self.totalBoxRight, text="€",  color="white", grid=[1,0], width=4, height=3, size=self.CONST_FONT_SIZE)
+        self.pWBTSum = Text(self.totalBoxRight, text=self.total, color="white", grid=[0,0], width=4, height=3, size=self.CONST_FONT_SIZE)
+
+
 
         self.payWindowCancleButton = PushButton(
-            self.payWindow, command=self.payWindow.hide, text="Abbrechen", height=4, width="fill", align="bottom")
+            self.payWindow, command=self.closePayWindow, text="Abbrechen", height=4, width="fill", align="bottom")
         self.payWindowCancleButton.text_color = "white"
 
         self.payWindowPayButton = PushButton(
