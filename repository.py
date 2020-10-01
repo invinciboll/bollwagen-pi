@@ -3,7 +3,7 @@ import sqlite3
 if False:
     conn = sqlite3.connect("database.db")
     c = conn.cursor()
-    
+
     if False:
         c.execute("DROP TABLE Person")
         c.execute("""CREATE TABLE Person (
@@ -14,10 +14,14 @@ if False:
         """)
         c.execute("INSERT INTO Person VALUES ('Sebastian','1048046807727',19.75)")
         conn.commit()
-    
+
     if False:
         c.execute("SELECT * FROM Person")
         print(c.fetchall())
+        conn.commit()
+
+    if True:
+        c.execute("INSERT INTO Person VALUES ('Christian','385650702521',135.50)")
         conn.commit()
 
 
@@ -43,13 +47,13 @@ class Database:
         self.connect()
         self.c.execute("SELECT balance FROM Person WHERE rfid = :rfid",
                        {'rfid': rfid})
-        balance = self.c.fetchall()
+        balance = self.c.fetchone()
         self.close()
-        return balance
+        return balance[0]
 
     def setBalance(self, rfid, balance):
         self.connect()
-        self.c.execute("INSERT INTO Person VALUES (:balance) WHERE rfid = :rfid", {
+        self.c.execute("UPDATE Person SET balance = :balance WHERE rfid = :rfid", {
             'balance': balance, 'rfid': rfid})
         self.close()
         return self.getBalance(rfid)

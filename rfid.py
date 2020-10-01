@@ -15,3 +15,7 @@ class Reader:
             finally:
                 GPIO.cleanup()
                 pass
+
+if False:
+    r = Reader()
+    print(r.getId())
