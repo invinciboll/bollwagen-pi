@@ -215,6 +215,12 @@ class mTileMoney(mTile):
         sn = rfid.getId()
         bl = db.getBalance(sn)
         self.bWTotal.value = bl
+        
+    def showBalanceWindow(self):
+        tr = threading.Thread(target=self.startBalanceScan)
+        self.balanceWindow.show()
+        tr.start()
+
 
     def generateCardWindow(self):
         self.pCardWindow = Window(self.payWindow, bg="black", visible=False)
@@ -337,10 +343,12 @@ class mTileMoney(mTile):
             self.payWindow, command=self.openPaymentProcess, text="Bezahlen", height=4, width="fill", align="bottom")
         self.payWindowPayButton.text_color = "white"
 
-    def showBalanceWindow(self):
-        tr = threading.Thread(target=self.startBalanceScan)
-        self.balanceWindow.show()
-        tr.start()
+  
+    #---Konto Aufladen
+    def cheat(self):
+        sn = rfid.getId()
+        bl = db.getBalance(sn)
+        db.setBalance(sn, bl+20)
 
     def generateMenu(self):
         self.menuButtons = []
@@ -349,7 +357,7 @@ class mTileMoney(mTile):
         self.menuButtons.append(PushButton(
             self.window, command=self.showBalanceWindow, text="Kontostand"))
         self.menuButtons.append(PushButton(
-            self.window, command=None, text="Aufladen"))
+            self.window, command=self.cheat, text="Aufladen"))
         for button in self.menuButtons:
             button.text_color = "white"
             button.width = "fill"
