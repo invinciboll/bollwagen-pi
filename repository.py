@@ -1,29 +1,12 @@
 import sqlite3
 
-if False:
-    conn = sqlite3.connect("database.db")
-    c = conn.cursor()
-
-    if False:
-        c.execute("DROP TABLE Person")
-        c.execute("""CREATE TABLE Person (
-            name TEXT NOT NULL,
-            rfid TEXT,
-            balance REAL DEFAULT 0.00
-            )
-        """)
-        c.execute("INSERT INTO Person VALUES ('Sebastian','1048046807727',19.75)")
-        conn.commit()
-
-    if False:
-        c.execute("SELECT * FROM Person")
-        print(c.fetchall())
-        conn.commit()
-
-    if True:
-        c.execute("INSERT INTO Person VALUES ('Christian','385650702521',135.50)")
-        conn.commit()
-
+class user:
+    def __init__(self, name, balance, drinkSum, hookahSum):
+        self.name = name
+        self.balance = balance
+        self.drinkSum = drinkSum if drinkSum is not None else 0
+        self.hookahSum = hookahSum if hookahSum is not None else 0
+        self.totalExpenses = self.drinkSum * 1 + self.hookahSum * 1.5
 
 class Database:
     def __init__(self, connectionName):
@@ -57,3 +40,16 @@ class Database:
             'balance': balance, 'rfid': rfid})
         self.close()
         return self.getBalance(rfid)
+
+    def getAccountInformation(self, rfid):
+        self.connect()
+        self.c.execute(f"SELECT Name, Balance FROM Person WHERE rfid = {rfid}")
+        res1 = self.c.fetchone()
+
+        self.c.execute(f"SELECT SUM(drinkSum), SUM(hookahSum) FROM Purchase WHERE rfid = {rfid}")
+        res2 = self.c.fetchone()
+
+        u = user(res1[0],res1[1],res2[0],res2[1])
+        print(f"User: {u.name}\nBalance: {u.balance}€\nDrinks: {u.drinkSum}\nHookahs: {u.hookahSum}")
+        self.close()
+        return u

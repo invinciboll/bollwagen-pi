@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from repository import Database
 from rfid import Reader
 import threading
+import time
 
 app = App(title="bollwagen", bg="black", layout="grid")
 db = Database("database.db")
@@ -156,6 +157,11 @@ class mTileMoney(mTile):
         self.generateBalanceWindow()
         self.generateMenu()
 
+    def reset(self):
+        self.drinkSum = 0
+        self.hookahSum = 0
+        self.updateDisplayedSums()
+
     def updateDisplayedSums(self):
         self.pWBDSum.value = self.drinkSum
         self.pWBHSum.value = self.hookahSum
@@ -183,44 +189,8 @@ class mTileMoney(mTile):
             self.updateDisplayedSums()
 
     def closePayWindow(self):
-        self.hookahSum = 0
-        self.drinkSum = 0
-        self.updateDisplayedSums()
+        self.reset()
         self.payWindow.hide()
-
-    def generateBalanceWindow(self):
-        self.balanceWindow = Window(self.payWindow, bg="black", visible=False)
-        self.balanceWindow.tk.attributes("-fullscreen", True)
-        self.balanceWindow.tk.config(cursor='none')
-
-        self.bWPicture = Picture(
-            self.balanceWindow, image=self.image + '_off.png', align="top")
-
-        self.bWText = Text(
-            self.balanceWindow, text="Bitte Karte auflegen", align="top")
-        self.bWText.text_color = "white"
-        self.bWText.text_size = self.CONST_FONT_SIZE
-
-        self.bWMasterBox = Box(
-            self.balanceWindow, width="fill", align="top", border=self.CONST_SHOW_BORDER)
-        self.bWTotal = Text(self.bWMasterBox)
-        self.bWTotal.text_color = "white"
-        self.bWTotal.text_size = self.CONST_FONT_SIZE*3
-
-        self.bWCancleButton = PushButton(
-            self.balanceWindow, command=self.balanceWindow.hide, text="Abbrechen", height=4, width="fill", align="bottom")
-        self.bWCancleButton.text_color = "white"
-
-    def startBalanceScan(self):
-        sn = rfid.getId()
-        bl = db.getBalance(sn)
-        self.bWTotal.value = bl
-        
-    def showBalanceWindow(self):
-        tr = threading.Thread(target=self.startBalanceScan)
-        self.balanceWindow.show()
-        tr.start()
-
 
     def generateCardWindow(self):
         self.pCardWindow = Window(self.payWindow, bg="black", visible=False)
@@ -255,12 +225,20 @@ class mTileMoney(mTile):
         sn = rfid.getId()
         balance = db.getBalance(sn)
         print(balance, type(balance))
+        self.pCWAnswer.size = self.CONST_FONT_SIZE
         if (self.total <= balance):
             db.setBalance(sn, balance-self.total)
+            self.pCWAnswer.text_color = "green"
             self.pCWAnswer.value = "Danke!"
+            
         else:
-            print("Fehler")
+            self.pCWAnswer.text_color = "red"
             self.pCWAnswer.value = "Fehler: zu wenig Guthaben"
+            
+        time.sleep(2)
+        self.pCWAnswer.value = "" 
+        self.reset()
+        self.pCardWindow.hide()
 
     def openPaymentProcess(self):
         self.pCardWindow.show()
@@ -343,8 +321,65 @@ class mTileMoney(mTile):
             self.payWindow, command=self.openPaymentProcess, text="Bezahlen", height=4, width="fill", align="bottom")
         self.payWindowPayButton.text_color = "white"
 
-  
-    #---Konto Aufladen
+    ### Kontoübersicht anzeigen
+    def generateBalanceWindow(self):
+        self.balanceWindow = Window(self.payWindow, bg="black", visible=False)
+        self.balanceWindow.tk.attributes("-fullscreen", True)
+        self.balanceWindow.tk.config(cursor='none')
+
+        self.bWPicture = Picture(
+            self.balanceWindow, image=self.image + '_off.png', align="top")
+
+        self.bWText = Text(
+            self.balanceWindow, text="Bitte Karte auflegen", align="top")
+        self.bWText.text_color = "white"
+        self.bWText.text_size = self.CONST_FONT_SIZE
+
+        self.bWMasterBox = Box(
+            self.balanceWindow, width="fill", align="top", border=self.CONST_SHOW_BORDER)
+        self.bWTotal = Text(self.bWMasterBox)
+        self.bWTotal.text_color = "white"
+        self.bWTotal.text_size = self.CONST_FONT_SIZE*3
+
+        self.bWStatisticBox = Box(self.balanceWindow, width="fill", align="top", layout="grid", border=self.CONST_SHOW_BORDER)
+        self.bWStatisticName = Text(self.bWStatisticBox, align="left", grid=[0,0])
+        self.bWStatisticName.text_color = "white"
+        self.bWStatisticName.text_size = self.CONST_FONT_SIZE
+        self.bWStatisticDrinks = Text(self.bWStatisticBox, align="left", grid=[0,1])
+        self.bWStatisticDrinks.text_color = "white"
+        self.bWStatisticDrinks.text_size = self.CONST_FONT_SIZE
+        self.bWStatisticHookahs = Text(self.bWStatisticBox, align="left", grid=[0,2])
+        self.bWStatisticHookahs.text_color = "white"
+        self.bWStatisticHookahs.text_size = self.CONST_FONT_SIZE
+
+        self.bWCancleButton = PushButton(
+            self.balanceWindow, command=self.hideBalanceWindow, text="Zurück", height=4, width="fill", align="bottom")
+        self.bWCancleButton.text_color = "white"
+
+    def startBalanceScan(self):
+        sn = rfid.getId()
+        #bl = db.getBalance(sn)
+        user = db.getAccountInformation(sn)
+        self.bWText.value =""
+        self.bWTotal.value = f"{user.balance}€"
+        self.bWStatisticName.value=f"Statistik für {user.name}"
+        self.bWStatisticDrinks.value=f"Getränke: {user.drinkSum}"
+        self.bWStatisticHookahs.value=f"Shisha-Köpfe: {user.hookahSum}"
+
+    def showBalanceWindow(self):
+        tr = threading.Thread(target=self.startBalanceScan)
+        self.balanceWindow.show()
+        tr.start()
+
+    def hideBalanceWindow(self):
+        self.bWText.value ="Bitte Karte auflegen"
+        self.bWTotal.value = ""
+        self.bWStatisticName.value=""
+        self.bWStatisticDrinks.value=""
+        self.bWStatisticHookahs.value=""
+        self.balanceWindow.hide()
+
+    ### Konto Aufladen
     def cheat(self):
         sn = rfid.getId()
         bl = db.getBalance(sn)
