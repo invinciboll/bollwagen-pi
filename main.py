@@ -335,12 +335,6 @@ class mTileMoney(mTile):
         self.bWText.text_color = "white"
         self.bWText.text_size = self.CONST_FONT_SIZE
 
-        self.bWMasterBox = Box(
-            self.balanceWindow, width="fill", align="top", border=self.CONST_SHOW_BORDER)
-        self.bWTotal = Text(self.bWMasterBox)
-        self.bWTotal.text_color = "white"
-        self.bWTotal.text_size = self.CONST_FONT_SIZE*3
-
         self.bWStatisticBox = Box(self.balanceWindow, width="fill", align="top", layout="grid", border=self.CONST_SHOW_BORDER)
         self.bWStatisticName = Text(self.bWStatisticBox, align="left", grid=[0,0])
         self.bWStatisticName.text_color = "white"
@@ -360,8 +354,8 @@ class mTileMoney(mTile):
         sn = rfid.getId()
         #bl = db.getBalance(sn)
         user = db.getAccountInformation(sn)
-        self.bWText.value =""
-        self.bWTotal.value = f"{user.balance}€"
+        self.bWText.value = f"{user.balance}€"
+        self.bWText.text_size = self.CONST_FONT_SIZE*3
         self.bWStatisticName.value=f"Statistik für {user.name}"
         self.bWStatisticDrinks.value=f"Getränke: {user.drinkSum}"
         self.bWStatisticHookahs.value=f"Shisha-Köpfe: {user.hookahSum}"
@@ -372,8 +366,8 @@ class mTileMoney(mTile):
         tr.start()
 
     def hideBalanceWindow(self):
-        self.bWText.value ="Bitte Karte auflegen"
-        self.bWTotal.value = ""
+        self.bWText.value = "Bitte Karte auflegen"
+        self.bWText.text_size = self.CONST_FONT_SIZE
         self.bWStatisticName.value=""
         self.bWStatisticDrinks.value=""
         self.bWStatisticHookahs.value=""
