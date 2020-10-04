@@ -161,6 +161,7 @@ class mTileMoney(mTile):
         self.generateCardWindowComponents()
         self.generatePayWindowComponents()
         self.generateBalanceWindow()
+        self.generateChargeWindow()
         self.generateMenu()
 
     def reset(self):
@@ -209,7 +210,7 @@ class mTileMoney(mTile):
 
         self.pCWMasterBox = Box(
             self.pCardWindow, width="fill", align="top", border=self.CONST_SHOW_BORDER)
-        self.pCWTotal = Text(self.pCWMasterBox, text=self.total)
+        self.pCWTotal = Text(self.pCWMasterBox, text=f"{self.total} €")
         self.pCWTotal.text_color = "white"
         self.pCWTotal.text_size = self.CONST_FONT_SIZE
 
@@ -240,7 +241,7 @@ class mTileMoney(mTile):
 
             self.pCWAnswer.text_color = "green"
             self.pCWAnswer.value = "Danke!"
-
+            self.pCWCancleButton.hide()
             width = 0
             for _ in range(120):
                 self.wDrawing.rectangle(
@@ -252,15 +253,18 @@ class mTileMoney(mTile):
             self.pCardWindow.hide()
             self.payWindow.hide()
             self.window.hide()
+
         else:
             self.pCWAnswer.text_color = "red"
             self.pCWAnswer.value = "Fehler: zu wenig Guthaben"
+            self.pCWCancleButton.hide()
             time.sleep(2)
             self.pCardWindow.hide()
             self.payWindow.hide()
 
         self.pCWAnswer.value = ""
         self.reset()
+        self.pCWCancleButton.show()
 
     def openPaymentProcess(self):
         self.pCardWindow.show()
@@ -378,9 +382,9 @@ class mTileMoney(mTile):
 
     def startBalanceScan(self):
         sn = rfid.getId()
-        #bl = db.getBalance(sn)
+        # bl = db.getBalance(sn)
         user = db.getAccountInformation(sn)
-        self.bWText.value = f"{user.balance}€"
+        self.bWText.value = f"{user.balance} €"
         self.bWText.text_size = self.CONST_FONT_SIZE*3
         self.bWStatisticName.value = f"Statistik für {user.name}"
         self.bWStatisticDrinks.value = f"Getränke: {user.drinkSum}"
@@ -400,6 +404,83 @@ class mTileMoney(mTile):
         self.balanceWindow.hide()
 
     # Konto Aufladen
+    def cWaddNumber(self, n):
+        if n is "<" and len(self.cWcurrentInput) > 0:
+            self.cWcurrentInput.pop(0)
+        elif type(n) is int:
+            self.cWcurrentInput.insert(0, n)
+
+        mystring = ""
+        for index, digit in enumerate(self.cWcurrentInput):
+            if index is 2:
+                mystring = f"{digit}" + f"." + mystring
+            else:
+                mystring = f"{digit}" + mystring
+
+        if len(self.cWcurrentInput) is 0:
+            self.cWText.value = f"Bitte Betrag eingeben"
+        elif len(self.cWcurrentInput) is 1:
+            self.cWText.value = f"0.0{mystring} €"
+        elif len(self.cWcurrentInput) is 2:
+            self.cWText.value = f"0.{mystring} €"
+        else:
+            self.cWText.value = f"{mystring} €"
+
+    def generateChargeWindow(self):
+        self.chargeWindow = Window(self.payWindow, bg="black", visible=False)
+        self.chargeWindow.tk.attributes("-fullscreen", True)
+        self.chargeWindow.tk.config(cursor='none')
+
+        self.cWPicture = Picture(
+            self.chargeWindow, image=self.image + '_off.png', align="top")
+
+        self.cWText = Text(
+            self.chargeWindow, text="Bitte Betrag eingeben", height=3, align="top")
+        self.cWText.text_color = "white"
+        self.cWText.text_size = self.CONST_FONT_SIZE
+        self.cWcurrentInput = []
+
+        self.cWNumpad = Box(self.chargeWindow, layout="grid",
+                            width="240", align="top")
+
+        buttonsNumpad = []
+        buttonsNumpad.append(PushButton(
+            self.cWNumpad, command=self.cWaddNumber, args=[0], text="0", grid=[1, 3]))
+        buttonsNumpad.append(PushButton(
+            self.cWNumpad, command=self.cWaddNumber, args=[1], text="1", grid=[0, 0]))
+        buttonsNumpad.append(PushButton(
+            self.cWNumpad, command=self.cWaddNumber, args=[2], text="2", grid=[1, 0]))
+        buttonsNumpad.append(PushButton(
+            self.cWNumpad, command=self.cWaddNumber, args=[3], text="3", grid=[2, 0]))
+        buttonsNumpad.append(PushButton(
+            self.cWNumpad, command=self.cWaddNumber, args=[4], text="4", grid=[0, 1]))
+        buttonsNumpad.append(PushButton(
+            self.cWNumpad, command=self.cWaddNumber, args=[5], text="5", grid=[1, 1]))
+        buttonsNumpad.append(PushButton(
+            self.cWNumpad, command=self.cWaddNumber, args=[6], text="6", grid=[2, 1]))
+        buttonsNumpad.append(PushButton(
+            self.cWNumpad, command=self.cWaddNumber, args=[7], text="7", grid=[0, 2]))
+        buttonsNumpad.append(PushButton(
+            self.cWNumpad, command=self.cWaddNumber, args=[8], text="8", grid=[1, 2]))
+        buttonsNumpad.append(PushButton(
+            self.cWNumpad, command=self.cWaddNumber, args=[9], text="9", grid=[2, 2]))
+        buttonsNumpad.append(PushButton(
+            self.cWNumpad, command=self.cWaddNumber, args=["<"], text="<", grid=[2, 3]))
+
+        for button in buttonsNumpad:
+            button.text_size = self.CONST_FONT_SIZE*2
+            button.text_color = "white"
+            button.width = 2
+            button.height = 1
+
+        self.cWCancleButton = PushButton(
+            self.chargeWindow, command=self.chargeWindow.hide, text="Zurück", height=4, width="fill", align="bottom")
+        self.cWCancleButton.text_color = "white"
+
+        self.cWConfirmButton = PushButton(
+            self.chargeWindow, command=self.openPaymentProcess, text="Bestätigen", height=4, width="fill", align="bottom")
+        self.cWConfirmButton.text_color = "white"
+
     def cheat(self):
         sn = rfid.getId()
         bl = db.getBalance(sn)
@@ -412,7 +493,7 @@ class mTileMoney(mTile):
         self.menuButtons.append(PushButton(
             self.window, command=self.showBalanceWindow, text="Kontostand"))
         self.menuButtons.append(PushButton(
-            self.window, command=self.cheat, text="Aufladen"))
+            self.window, command=self.chargeWindow.show, text="Aufladen"))
         for button in self.menuButtons:
             button.text_color = "white"
             button.width = "fill"
