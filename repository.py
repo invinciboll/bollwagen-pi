@@ -53,3 +53,8 @@ class Database:
         print(f"User: {u.name}\nBalance: {u.balance}€\nDrinks: {u.drinkSum}\nHookahs: {u.hookahSum}")
         self.close()
         return u
+
+    def insertPurchase(self,rfid,drinkSum, hookahSum):
+        self.connect()
+        self.c.execute(f"INSERT INTO Purchase(rfid, drinkSum, hookahSum) VALUES ({rfid},{drinkSum},{hookahSum})")
+        self.close()

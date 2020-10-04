@@ -1,3 +1,5 @@
+# gpiozero needs rpigpio as native factory in system variables ~/.bashrc
+
 from guizero import App, Window, PushButton, Box, Picture, Slider, Text, Drawing
 from colormap import rgb2hex
 from gpiozero import PWMLED, LED
@@ -6,6 +8,7 @@ from repository import Database
 from rfid import Reader
 import threading
 import time
+
 
 app = App(title="bollwagen", bg="black", layout="grid")
 db = Database("database.db")
@@ -78,6 +81,9 @@ class mTileLed(mTile):
         self.ledR = PWMLED(gpioR)
         self.ledG = PWMLED(gpioG)
         self.ledB = PWMLED(gpioB)
+        self.r = 0
+        self.g = 0
+        self.b = 0
         super().__init__(image, grid)
         self.generateDrawing()
         self.generateSliders()
@@ -217,6 +223,9 @@ class mTileMoney(mTile):
         self.pCWAnswer.text_color = "white"
         self.pCWAnswer.text_size = self.CONST_FONT_SIZE
 
+        self.wDrawing = Drawing(
+            self.pCardWindow, align="top", width="fill", visible=True)
+
         self.pCWCancleButton = PushButton(
             self.pCardWindow, command=self.closePaymentProcess, text="Zurück", height=4, width="fill", align="bottom")
         self.pCWCancleButton.text_color = "white"
@@ -224,21 +233,34 @@ class mTileMoney(mTile):
     def startPaymentProcess(self):
         sn = rfid.getId()
         balance = db.getBalance(sn)
-        print(balance, type(balance))
         self.pCWAnswer.size = self.CONST_FONT_SIZE
         if (self.total <= balance):
             db.setBalance(sn, balance-self.total)
+            db.insertPurchase(sn, self.drinkSum, self.hookahSum)
+
             self.pCWAnswer.text_color = "green"
             self.pCWAnswer.value = "Danke!"
-            
+
+            width = 0
+            for _ in range(120):
+                self.wDrawing.rectangle(
+                    0, 0, width, 8, color="green")
+                time.sleep(0.016)
+                width += 4
+
+            self.wDrawing.clear()
+            self.pCardWindow.hide()
+            self.payWindow.hide()
+            self.window.hide()
         else:
             self.pCWAnswer.text_color = "red"
             self.pCWAnswer.value = "Fehler: zu wenig Guthaben"
-            
-        time.sleep(2)
-        self.pCWAnswer.value = "" 
+            time.sleep(2)
+            self.pCardWindow.hide()
+            self.payWindow.hide()
+
+        self.pCWAnswer.value = ""
         self.reset()
-        self.pCardWindow.hide()
 
     def openPaymentProcess(self):
         self.pCardWindow.show()
@@ -321,7 +343,7 @@ class mTileMoney(mTile):
             self.payWindow, command=self.openPaymentProcess, text="Bezahlen", height=4, width="fill", align="bottom")
         self.payWindowPayButton.text_color = "white"
 
-    ### Kontoübersicht anzeigen
+    # Kontoübersicht anzeigen
     def generateBalanceWindow(self):
         self.balanceWindow = Window(self.payWindow, bg="black", visible=False)
         self.balanceWindow.tk.attributes("-fullscreen", True)
@@ -335,14 +357,18 @@ class mTileMoney(mTile):
         self.bWText.text_color = "white"
         self.bWText.text_size = self.CONST_FONT_SIZE
 
-        self.bWStatisticBox = Box(self.balanceWindow, width="fill", align="top", layout="grid", border=self.CONST_SHOW_BORDER)
-        self.bWStatisticName = Text(self.bWStatisticBox, align="left", grid=[0,0])
+        self.bWStatisticBox = Box(self.balanceWindow, width="fill",
+                                  align="top", layout="grid", border=self.CONST_SHOW_BORDER)
+        self.bWStatisticName = Text(
+            self.bWStatisticBox, align="left", grid=[0, 0])
         self.bWStatisticName.text_color = "white"
         self.bWStatisticName.text_size = self.CONST_FONT_SIZE
-        self.bWStatisticDrinks = Text(self.bWStatisticBox, align="left", grid=[0,1])
+        self.bWStatisticDrinks = Text(
+            self.bWStatisticBox, align="left", grid=[0, 1])
         self.bWStatisticDrinks.text_color = "white"
         self.bWStatisticDrinks.text_size = self.CONST_FONT_SIZE
-        self.bWStatisticHookahs = Text(self.bWStatisticBox, align="left", grid=[0,2])
+        self.bWStatisticHookahs = Text(
+            self.bWStatisticBox, align="left", grid=[0, 2])
         self.bWStatisticHookahs.text_color = "white"
         self.bWStatisticHookahs.text_size = self.CONST_FONT_SIZE
 
@@ -356,9 +382,9 @@ class mTileMoney(mTile):
         user = db.getAccountInformation(sn)
         self.bWText.value = f"{user.balance}€"
         self.bWText.text_size = self.CONST_FONT_SIZE*3
-        self.bWStatisticName.value=f"Statistik für {user.name}"
-        self.bWStatisticDrinks.value=f"Getränke: {user.drinkSum}"
-        self.bWStatisticHookahs.value=f"Shisha-Köpfe: {user.hookahSum}"
+        self.bWStatisticName.value = f"Statistik für {user.name}"
+        self.bWStatisticDrinks.value = f"Getränke: {user.drinkSum}"
+        self.bWStatisticHookahs.value = f"Shisha-Köpfe: {user.hookahSum}"
 
     def showBalanceWindow(self):
         tr = threading.Thread(target=self.startBalanceScan)
@@ -368,12 +394,12 @@ class mTileMoney(mTile):
     def hideBalanceWindow(self):
         self.bWText.value = "Bitte Karte auflegen"
         self.bWText.text_size = self.CONST_FONT_SIZE
-        self.bWStatisticName.value=""
-        self.bWStatisticDrinks.value=""
-        self.bWStatisticHookahs.value=""
+        self.bWStatisticName.value = ""
+        self.bWStatisticDrinks.value = ""
+        self.bWStatisticHookahs.value = ""
         self.balanceWindow.hide()
 
-    ### Konto Aufladen
+    # Konto Aufladen
     def cheat(self):
         sn = rfid.getId()
         bl = db.getBalance(sn)
@@ -397,10 +423,10 @@ tiles = []
 tiles.append(tTile('sign', [0, 0], 14))
 tiles.append(tTile('outside', [1, 0], 15))
 tiles.append(tTile('shots', [0, 1], 16))
-# tiles.append(mTileLed('ambient', [1, 1], 3, 5, 7))
+tiles.append(mTileLed('ambient', [1, 1], 3, 4, 17))
 tiles.append(mTile('effect', [0, 2]))
-tiles.append(mTile('logo', [1, 2]))
-# tiles.append(mTileVent('vent', [0, 3], 21))
+tiles.append(mTileLed('logo', [1, 2], 18, 23, 24))
+tiles.append(mTileVent('vent', [0, 3], 12))
 tiles.append(mTileMoney('money', [1, 3]))
 
 ###########################################################################################################################################
