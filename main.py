@@ -407,6 +407,8 @@ class mTileMoney(mTile):
     def cWaddNumber(self, n):
         if n is "<" and len(self.cWcurrentInput) > 0:
             self.cWcurrentInput.pop(0)
+        elif n is 0 and len(self.cWcurrentInput) is 0:
+            pass
         elif type(n) is int:
             self.cWcurrentInput.insert(0, n)
 

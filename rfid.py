@@ -14,6 +14,5 @@ class Reader:
             try:
                 id = self.reader.read_id()
                 return str(id)
-                pass
             finally:
                 pass
