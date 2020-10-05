@@ -8,6 +8,7 @@ import time
 
 class DisplayPayment(Display):
     def __init__(self, app, path, image):
+        self.stop = False
         self.db = Database("database.db")
         self.rfid = Reader()
         super().__init__(app, path, image, use_cancle_button=True, use_confirm_button=False)
@@ -37,31 +38,42 @@ class DisplayPayment(Display):
         pass
 
     def cancle(self):
+        self.stop = True
         self.close()
 
     def startPaymentProcess(self, total, drink_sum, hookah_sum):
-        sn = self.rfid.getId()
-        balance = self.db.getBalance(sn)
-        if (total <= balance):
-            # payment accepted
-            self.db.setBalance(sn, balance-total)
-            self.db.insertPurchase(sn, drink_sum, hookah_sum)
+        self.stop = False
+        while (not self.stop):
+            sn = self.rfid.getId()    
+            if len(sn) > 4 :
+                break   
 
-            # give response to user
-            self.instruction_text.text_color = "green"
-            self.instruction_text.value = "Danke!"
-            self.cancle_button.hide()
-            width = 0
-            for _ in range(120):
-                self.progress_bar.rectangle(
-                    0, 0, width, 8, color="green")
-                time.sleep(0.016)
-                width += 4
+        if not self.stop:
+            balance = self.db.getBalance(sn)
+            if (total <= balance):
+                # payment accepted
+                self.db.setBalance(sn, balance-total)
+                self.db.insertPurchase(sn, drink_sum, hookah_sum)
+
+                # give response to user
+                self.instruction_text.text_color = "green"
+                self.instruction_text.value = "Danke!"
+                self.cancle_button.hide()
+                width = 0
+                for _ in range(120):
+                    self.progress_bar.rectangle(
+                        0, 0, width, 8, color="green")
+                    time.sleep(0.016)
+                    width += 4
+            else:
+                self.instruction_text.text_color = "red"
+                self.instruction_text.value = "Fehler: zu wenig Guthaben"
+                self.cancle_button.hide()
+                time.sleep(2)
         else:
-            self.instruction_text.text_color = "red"
-            self.instruction_text.value = "Fehler: zu wenig Guthaben"
-            self.cancle_button.hide()
-            time.sleep(2)
+            # break from thread
+            print("Killing Thread")    
+        
         self.reset()
 
 
