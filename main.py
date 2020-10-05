@@ -1,4 +1,5 @@
 # gpiozero needs rpigpio as native factory in system variables ~/.bashrc
+# display is used naming for window
 
 from guizero import App, Window, PushButton, Box, Picture, Slider, Text, Drawing
 from colormap import rgb2hex
@@ -8,6 +9,7 @@ from repository import Database
 from rfid import Reader
 import threading
 import time
+from display import *
 
 
 app = App(title="bollwagen", bg="black", layout="grid")
@@ -20,16 +22,6 @@ class Tile:
     def __init__(self, image, grid):
         self.image = image
         self.grid = grid
-        self.generateComponents()
-        self.generateTileButton()
-
-    @abstractmethod
-    def generateComponents(self):
-        pass
-
-    @abstractmethod
-    def generateTileButton(self):
-        pass
 
 ###########################################################################################################################################
 ### Toggle Buttons ########################################################################################################################
@@ -37,20 +29,18 @@ class Tile:
 
 class tTile(Tile):
     def __init__(self, image, grid, gpio):
-        self.led = LED(gpio)
         super().__init__(image, grid)
+        self.led = LED(gpio)
+        self.button = PushButton(app, command=self.toggle,
+                                 grid=self.grid, align='left', image=path + self.image+'_off.png')
 
     def toggle(self):
         self.led.toggle()
         if(self.led.is_active):
             self.button.image = path + self.image+'_on.png'
-            print(db.getBalance("myrfid"))
         else:
             self.button.image = path + self.image+'_off.png'
 
-    def generateTileButton(self):
-        self.button = PushButton(app, command=self.toggle,
-                                 grid=self.grid, align='left', image=path + self.image+'_off.png')
 
 ###########################################################################################################################################
 ### Menu Buttons ##########################################################################################################################
@@ -59,22 +49,22 @@ class tTile(Tile):
 class mTile(Tile):
     def __init__(self, image, grid):
         super().__init__(image, grid)
-
-    def generateComponents(self):
-        self.window = Window(app, title=self.image, bg="black", visible=False)
-        self.window.tk.attributes("-fullscreen", True)
-        self.window.tk.config(cursor='none')
-
-        self.wPicture = Picture(self.window, image=self.image + '_off.png')
-
-        self.wBackButton = PushButton(
-            self.window, command=self.window.hide, text="Zurück", height=4, width="fill", align="bottom")
-        self.wBackButton.text_color = "white"
-
-    def generateTileButton(self):
-        self.button = PushButton(app, command=self.window.show,
+        self.display = Display(app, self.image, True, True)
+        PushButton(app, command=self.display.open,
                                  grid=self.grid, align='left', image=path + self.image+'_off.png')
 
+class mTileLedNew(mTile):
+     def __init__(self, image, grid, gpioR, gpioG, gpioB):
+        super().__init__(image, grid)
+        self.ledR = PWMLED(gpioR)
+        self.ledG = PWMLED(gpioG)
+        self.ledB = PWMLED(gpioB)
+        self.r = 0
+        self.g = 0
+        self.b = 0
+        super().__init__(image, grid)
+        self.generateDrawing()
+        self.generateSliders()
 
 class mTileLed(mTile):
     def __init__(self, image, grid, gpioR, gpioG, gpioB):
@@ -144,7 +134,6 @@ class mTileVent(mTile):
                                  end=100, width="fill", height=100)
         self.wSliderFan.text_color = "white"
 
-
 class mTileMoney(mTile):
     drinkSum = 0
     hookahSum = 0
@@ -163,6 +152,7 @@ class mTileMoney(mTile):
         self.generateBalanceWindow()
         self.generatePaymentMethodWindow()
         self.generateChargeWindow()
+        self.cw = Display(app, "money", True, True)
         self.generateMenu()
 
     def reset(self):
@@ -522,7 +512,7 @@ class mTileMoney(mTile):
         self.menuButtons.append(PushButton(
             self.window, command=self.showBalanceWindow, text="Kontostand"))
         self.menuButtons.append(PushButton(
-            self.window, command=self.chargeWindow.show, text="Aufladen"))
+            self.window, command=self.cw.open, text="Aufladen"))
         for button in self.menuButtons:
             button.text_color = "white"
             button.width = "fill"
@@ -533,11 +523,12 @@ tiles = []
 tiles.append(tTile('sign', [0, 0], 14))
 tiles.append(tTile('outside', [1, 0], 15))
 tiles.append(tTile('shots', [0, 1], 16))
-tiles.append(mTileLed('ambient', [1, 1], 3, 4, 17))
+#tiles.append(mTileLed('ambient', [1, 1], 3, 4, 17))
 tiles.append(mTile('effect', [0, 2]))
-tiles.append(mTileLed('logo', [1, 2], 18, 23, 24))
-tiles.append(mTileVent('vent', [0, 3], 12))
-tiles.append(mTileMoney('money', [1, 3]))
+#tiles.append(mTileLed('logo', [1, 2], 18, 23, 24))
+#tiles.append(mTileVent('vent', [0, 3], 12))
+#tiles.append(mTileMoney('money', [1, 3]))
+
 
 ###########################################################################################################################################
 ##
