@@ -1,8 +1,9 @@
 from display import Display
 from guizero import PushButton
-from displayshoppingcard import DisplayShoppingCard 
+from displayshoppingcard import DisplayShoppingCard
 from displaybalance import DisplayBalance
 from displaycharge import DisplayCharge
+
 
 class DisplayMoneyMenu(Display):
     def __init__(self, app, path, image):
@@ -25,11 +26,9 @@ class DisplayMoneyMenu(Display):
             button.width = "fill"
             button.height = 4
 
-
     def confirm(self):
         #not needed
         pass
 
     def cancle(self):
         self.close()
-

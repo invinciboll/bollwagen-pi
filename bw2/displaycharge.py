@@ -1,9 +1,12 @@
 from display import Display
+from displaypaymethod import DisplayPayMethod
 from guizero import PushButton, Text, Box
 
 
 class DisplayCharge(Display):
     def __init__(self, app, path, image):
+        self.amount = ""
+        self.display_pay_method = DisplayPayMethod(app, path, image)
         super().__init__(app, path, image, use_cancle_button=True, use_confirm_button=True)
 
     def generateComponents(self):
@@ -14,7 +17,7 @@ class DisplayCharge(Display):
         self.current_input = []
 
         self.numpad = Box(self.window, layout="grid",
-                            width="240", align="top")
+                          width="240", align="top")
 
         buttonsNumpad = []
         buttonsNumpad.append(PushButton(
@@ -46,13 +49,12 @@ class DisplayCharge(Display):
             button.width = 2
             button.height = 1
 
-
     def confirm(self):
-        pass
+        self.display_pay_method.open(self.amount)
+        self.close()
 
     def cancle(self):
         self.reset_numpad()
-
         self.close()
 
     def edit_number(self, n):
@@ -71,14 +73,15 @@ class DisplayCharge(Display):
                 mystring = f"{digit}" + mystring
 
         if len(self.current_input) is 0:
-            self.top_text.value = f"Bitte Betrag eingeben"
+            self.amount = f"Bitte Betrag eingeben"
         elif len(self.current_input) is 1:
-            self.top_text.value = f"0.0{mystring} €"
+            self.amount = f"0.0{mystring}"
         elif len(self.current_input) is 2:
-            self.top_text.value = f"0.{mystring} €"
+            self.amount = f"0.{mystring}"
         else:
-            self.top_text.value = f"{mystring} €"
-    
+            self.amount = f"{mystring}"
+        self.top_text.value = f"{self.amount} €"
+
     def reset_numpad(self):
         self.current_input.clear()
         self.top_text.value = f"Bitte Betrag eingeben"
