@@ -161,6 +161,7 @@ class mTileMoney(mTile):
         self.generateCardWindowComponents()
         self.generatePayWindowComponents()
         self.generateBalanceWindow()
+        self.generatePaymentMethodWindow()
         self.generateChargeWindow()
         self.generateMenu()
 
@@ -428,6 +429,32 @@ class mTileMoney(mTile):
         else:
             self.cWText.value = f"{mystring} €"
 
+    def generatePaymentMethodWindow(self):
+        self.paymentMethodWindow = Window(self.payWindow, bg="black", visible=False)
+        self.paymentMethodWindow.tk.attributes("-fullscreen", True)
+        self.paymentMethodWindow.tk.config(cursor='none')
+
+        self.pMWPicture = Picture(
+            self.paymentMethodWindow, image=self.image + '_off.png', align="top")
+
+        self.pMWText = Text(
+            self.paymentMethodWindow, text="Bezahlmethode auswählen", height=3, align="top")
+        self.pMWText.text_color = "white"
+        self.pMWText.text_size = self.CONST_FONT_SIZE
+
+        self.cWCashButton = PushButton(
+            self.paymentMethodWindow, command=None, text="Bar", height=4, width="fill", align="top")
+        self.cWCashButton.text_color = "white"
+
+        self.cWPayPalButton = PushButton(
+            self.paymentMethodWindow, command=None, text="Paypal", height=4, width="fill", align="top", enabled=False)
+        self.cWPayPalButton.text_color = "white"
+        self.cWPayPalButton.bg = "blue"
+
+        self.cWCancleButton = PushButton(
+            self.paymentMethodWindow, command=self.paymentMethodWindow.hide, text="Zurück", height=4, width="fill", align="bottom")
+        self.cWCancleButton.text_color = "white"
+
     def generateChargeWindow(self):
         self.chargeWindow = Window(self.payWindow, bg="black", visible=False)
         self.chargeWindow.tk.attributes("-fullscreen", True)
@@ -480,7 +507,7 @@ class mTileMoney(mTile):
         self.cWCancleButton.text_color = "white"
 
         self.cWConfirmButton = PushButton(
-            self.chargeWindow, command=self.openPaymentProcess, text="Bestätigen", height=4, width="fill", align="bottom")
+            self.chargeWindow, command=self.paymentMethodWindow.show, text="Bestätigen", height=4, width="fill", align="bottom")
         self.cWConfirmButton.text_color = "white"
 
     def cheat(self):
