@@ -7,12 +7,8 @@ GPIO.setmode(GPIO.BCM)
 class Reader:
     def __init__(self):
         self.reader = SimpleMFRC522()
-        pass
 
     def getId(self):
-        while True:
-            try:
-                id = self.reader.read_id()
-                return str(id)
-            finally:
-                pass
+        id = self.reader.read_id_no_block()
+        return str(id)
+

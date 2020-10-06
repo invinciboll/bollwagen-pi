@@ -21,6 +21,7 @@ class DisplayBalance(Display):
         self.statistics_box = Box(
             self.window, width="fill", align="top", layout="grid")
         self.statistics_name = Text(
+ 
             self.statistics_box, align="left", grid=[0, 0], size=self.CONST_FONT_SIZE_GENERAL)
         self.statistics_name.text_color = "white"
 

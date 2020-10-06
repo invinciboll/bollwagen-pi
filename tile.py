@@ -3,6 +3,7 @@ from gpiozero import LED
 from guizero import PushButton
 from displayledcontrol import DisplayLedControl
 from displaymoneymenu import DisplayMoneyMenu
+from displayvent import DisplayVent
 
 class Tile:
     def __init__(self, app, path, image, grid, command):
@@ -40,3 +41,5 @@ class MenuTile(Tile):
             self.display = DisplayLedControl(app, path, image, gpio_list[0], gpio_list[1], gpio_list[2])
         elif menu_type is 'MoneyMenu':
             self.display = DisplayMoneyMenu(app, path, image)
+        elif menu_type is 'Vent':
+            self.display = DisplayVent(app, path, image, gpio_list[0])
