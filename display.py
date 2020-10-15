@@ -9,6 +9,8 @@ class Display(ABC):
         self.window = Window(app, title=image, bg="black", visible=False)
         self.window.tk.attributes("-fullscreen", True)
         self.window.tk.config(cursor='none')
+        self.path = path
+        self.image = image
 
         self.picture = Picture(self.window, image=f"{path}{image}_off.png", align="top")
         

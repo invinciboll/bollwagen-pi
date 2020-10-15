@@ -33,6 +33,10 @@ class DisplayLedControl(Display):
     def __processColor(self):
         self.drawing.rectangle(
             20, 0, 460, 60, color=rgb2hex(self.red, self.green, self.blue))
+        if self.red == 0 and self.green == 0 and self.blue == 0:
+            self.picture.image = f"{self.path}{self.image}_off.png"
+        else:
+            self.picture.image = f"{self.path}{self.image}_on.png"
 
     def __sliderRedChanged(self, n):
         self.red = int(n)
