@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from guizero import Window, Picture, PushButton
 
+
 class Display(ABC):
     CONST_TEXT_COLOR = "white"
     CONST_FONT_SIZE_GENERAL = 16
@@ -12,8 +13,9 @@ class Display(ABC):
         self.path = path
         self.image = image
 
-        self.picture = Picture(self.window, image=f"{path}{image}_off.png", align="top")
-        
+        self.picture = Picture(
+            self.window, image=f"{path}{image}_off.png", align="top")
+
         self.generateComponents()
 
         if use_cancle_button:
@@ -22,14 +24,14 @@ class Display(ABC):
             self.cancle_button.text_color = self.CONST_TEXT_COLOR
         else:
             self.cancle_button = None
-            
+
         if use_confirm_button:
             self.confirm_button = PushButton(
                 self.window, command=self.confirm, text="Bestätigen", height=4, width="fill", align="bottom")
             self.confirm_button.text_color = self.CONST_TEXT_COLOR
-        else: 
+        else:
             self.confirm_button = None
-     
+
     def open(self, *args):
         self.window.show()
 
@@ -39,12 +41,11 @@ class Display(ABC):
     @abstractmethod
     def generateComponents(self):
         pass
-    
+
     @abstractmethod
     def confirm(self):
         pass
-    
+
     @abstractmethod
     def cancle(self):
         pass
-

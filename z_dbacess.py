@@ -34,12 +34,16 @@ if False:
         )
     """)
 
-    c.execute("INSERT INTO Purchase(rfid, drinkSum, hookahSum) VALUES ('1048046807727',4,3)")
-    c.execute("INSERT INTO Purchase(rfid, drinkSum, hookahSum) VALUES ('1048046807727',1,4)")
-    c.execute("INSERT INTO Purchase(rfid, drinkSum, hookahSum) VALUES ('1048046807727',5,0)")
+    c.execute(
+        "INSERT INTO Purchase(rfid, drinkSum, hookahSum) VALUES ('1048046807727',4,3)")
+    c.execute(
+        "INSERT INTO Purchase(rfid, drinkSum, hookahSum) VALUES ('1048046807727',1,4)")
+    c.execute(
+        "INSERT INTO Purchase(rfid, drinkSum, hookahSum) VALUES ('1048046807727',5,0)")
     c.execute("SELECT * FROM Purchase")
     print(c.fetchall())
     conn.commit()
+
 
 class user:
     def __init__(self, name, balance, drinkSum, hookahSum):
@@ -49,14 +53,27 @@ class user:
         self.hookahSum = hookahSum
         self.totalExpenses = drinkSum * 1 + hookahSum * 1.5
 
-if True: 
+
+if False:
     rfid = '1048046807727'
     c.execute(f"SELECT Name, Balance FROM Person WHERE rfid = {rfid}")
     res1 = c.fetchone()
 
-    c.execute(f"SELECT SUM(drinkSum), SUM(hookahSum) FROM Purchase WHERE rfid = {rfid}")
+    c.execute(
+        f"SELECT SUM(drinkSum), SUM(hookahSum) FROM Purchase WHERE rfid = {rfid}")
     res2 = c.fetchone()
 
-    u = user(res1[0],res1[1],res2[0],res2[1])
-    print(f"User: {u.name}\nBalance: {u.balance}€\nDrinks: {u.drinkSum}\nHookahs: {u.hookahSum}")
+    u = user(res1[0], res1[1], res2[0], res2[1])
+    print(
+        f"User: {u.name}\nBalance: {u.balance}€\nDrinks: {u.drinkSum}\nHookahs: {u.hookahSum}")
     conn.commit()
+
+if True:
+    rfid = '1048046807727'
+    c.execute(
+        f"SELECT timestamp, drinkSum, hookahSum FROM Purchase WHERE rfid={rfid} ORDER BY timestamp DESC LIMIT 5")
+    res1 = c.fetchall()
+    print(res1)
+    conn.commit()
+
+    

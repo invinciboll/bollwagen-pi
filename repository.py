@@ -1,5 +1,6 @@
 import sqlite3
 
+
 class user:
     def __init__(self, name, balance, drinkSum, hookahSum):
         self.name = name
@@ -7,6 +8,7 @@ class user:
         self.drinkSum = drinkSum if drinkSum is not None else 0
         self.hookahSum = hookahSum if hookahSum is not None else 0
         self.totalExpenses = self.drinkSum * 1 + self.hookahSum * 1.5
+
 
 class Database:
     def __init__(self, connectionName):
@@ -46,15 +48,26 @@ class Database:
         self.c.execute(f"SELECT Name, Balance FROM Person WHERE rfid = {rfid}")
         res1 = self.c.fetchone()
 
-        self.c.execute(f"SELECT SUM(drinkSum), SUM(hookahSum) FROM Purchase WHERE rfid = {rfid}")
+        self.c.execute(
+            f"SELECT SUM(drinkSum), SUM(hookahSum) FROM Purchase WHERE rfid = {rfid}")
         res2 = self.c.fetchone()
 
-        u = user(res1[0],res1[1],res2[0],res2[1])
-        print(f"User: {u.name}\nBalance: {u.balance}€\nDrinks: {u.drinkSum}\nHookahs: {u.hookahSum}")
+        u = user(res1[0], res1[1], res2[0], res2[1])
+        print(
+            f"User: {u.name}\nBalance: {u.balance}€\nDrinks: {u.drinkSum}\nHookahs: {u.hookahSum}")
         self.close()
         return u
 
-    def insertPurchase(self,rfid,drinkSum, hookahSum):
+    def insertPurchase(self, rfid, drinkSum, hookahSum):
         self.connect()
-        self.c.execute(f"INSERT INTO Purchase(rfid, drinkSum, hookahSum) VALUES ({rfid},{drinkSum},{hookahSum})")
+        self.c.execute(
+            f"INSERT INTO Purchase(rfid, drinkSum, hookahSum) VALUES ({rfid},{drinkSum},{hookahSum})")
         self.close()
+
+    def get_purchase_history(self, rfid):
+        self.connect()
+        self.c.execute(
+            f"SELECT timestamp, drinkSum, hookahSum FROM Purchase WHERE rfid={rfid} ORDER BY timestamp DESC LIMIT 5")
+        res = self.c.fetchall()
+        self.close()
+        return res
