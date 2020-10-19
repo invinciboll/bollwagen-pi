@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, date, timedelta
 
 
 class user:
@@ -42,6 +43,39 @@ class Database:
             'balance': balance, 'rfid': rfid})
         self.close()
         return self.getBalance(rfid)
+
+    def get_name(self, rfid):
+        self.connect()
+        self.c.execute("SELECT name FROM Person WHERE rfid = :rfid",
+                       {'rfid': rfid})
+        res = self.c.fetchone()
+        self.close()
+        return res[0]
+
+    def get_statistic(self, rfid, interval):
+        self.connect()
+        if interval == "lifetime":
+            self.c.execute(
+                f"SELECT SUM(drinkSum), SUM(hookahSum) FROM Purchase WHERE rfid = {rfid}")
+        elif interval == "year":
+            last_accepted_timestamp = datetime.now() - timedelta(days=365)
+            self.c.execute(
+                f"SELECT SUM(drinkSum), SUM(hookahSum) FROM Purchase WHERE rfid = {rfid} AND timestamp >= '{last_accepted_timestamp}'")
+        elif interval == "month":
+            last_accepted_timestamp = datetime.now() - timedelta(days=31)
+            self.c.execute(
+                f"SELECT SUM(drinkSum), SUM(hookahSum) FROM Purchase WHERE rfid = {rfid} AND timestamp >= '{last_accepted_timestamp}'")
+        elif interval == "week":
+            last_accepted_timestamp = datetime.now() - timedelta(days=7)
+            self.c.execute(
+                f"SELECT SUM(drinkSum), SUM(hookahSum) FROM Purchase WHERE rfid = {rfid} AND timestamp >= '{last_accepted_timestamp}'")
+
+        res = self.c.fetchone()
+        self.close()
+        if res is not None: 
+            return res
+        else:
+            return [0,0]
 
     def getAccountInformation(self, rfid):
         self.connect()

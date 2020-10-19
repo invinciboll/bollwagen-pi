@@ -1,4 +1,5 @@
 import sqlite3
+from repository import Database
 
 
 conn = sqlite3.connect("database.db")
@@ -68,7 +69,7 @@ if False:
         f"User: {u.name}\nBalance: {u.balance}€\nDrinks: {u.drinkSum}\nHookahs: {u.hookahSum}")
     conn.commit()
 
-if True:
+if False:
     rfid = '1048046807727'
     c.execute(
         f"SELECT timestamp, drinkSum, hookahSum FROM Purchase WHERE rfid={rfid} ORDER BY timestamp DESC LIMIT 5")
@@ -76,4 +77,23 @@ if True:
     print(res1)
     conn.commit()
 
+if True:
+    rfid = '1048046807727'
+    db = Database("database.db")
+    name = db.get_name(rfid)
+    print(name)
     
+    db.setBalance(rfid, 20)
+
+    sta_life = db.get_statistic(rfid, 'lifetime')
+    print("Lifetime: ", sta_life)
+
+    sta_year = db.get_statistic(rfid, 'year')
+    print("Year: ", sta_year)
+
+    sta_year = db.get_statistic(rfid, 'month')
+    print("Month: ", sta_year)
+
+    sta_year = db.get_statistic(rfid, 'week')
+    print("Week: ", sta_year)
+

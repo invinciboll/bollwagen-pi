@@ -12,9 +12,7 @@ class DisplayHistory(Display):
     def open(self, *args):
         self.window.show()
         sn = "".join(args)
-        print(sn)
         purchases = self.db.get_purchase_history(sn)
-        print(purchases)
         self.list_entries = []
         for purchase in purchases:
             self.list_entries.append(List_Entry(self.window,
