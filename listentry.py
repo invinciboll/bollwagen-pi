@@ -8,13 +8,13 @@ class List_Entry():
     CONST_DRINK_PRICE = 1.00
 
     def __init__(self, display, timestamp, drink_sum, hookah_sum):
-        master = Box(display, width="fill", height="60",
-                     layout="auto", border=True)
+        self.master = Box(display, width="fill", height="60",
+                          layout="auto", border=True)
 
-        Text(master, text=f"{timestamp}", size=self.CONST_FONT_SIZE_GENERAL,
+        Text(self.master, text=f"{timestamp}", size=self.CONST_FONT_SIZE_GENERAL,
              color=self.CONST_TEXT_COLOR, align="left")
 
-        box = Box(master, width="160", height="60",
+        box = Box(self.master, width="160", height="60",
                   layout="grid", border=True, align="right")
 
         Text(box, text=f"{drink_sum}", size=self.CONST_FONT_SIZE_GENERAL,
@@ -28,3 +28,6 @@ class List_Entry():
 
         Text(box, text=f"{total} €", size=self.CONST_FONT_SIZE_GENERAL,
              color=self.CONST_TEXT_COLOR, grid=[3, 0], width=5)
+
+    def destroy(self):
+        self.master.destroy()

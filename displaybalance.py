@@ -96,3 +96,5 @@ class DisplayBalance(Display):
         self.top_text.text_color = "white"
         self.top_text.value = "Bitte Karte auflegen"
         self.top_text.size = self.CONST_FONT_SIZE_GENERAL
+        self.order_history.visible = False
+        self.button_box.visible = False

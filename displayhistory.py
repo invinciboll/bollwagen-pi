@@ -27,5 +27,7 @@ class DisplayHistory(Display):
         pass
 
     def cancle(self):
+        for entry in self.list_entries:
+            entry.destroy()
         self.list_entries.clear()
         self.close()
