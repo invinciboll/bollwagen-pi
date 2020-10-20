@@ -1,9 +1,9 @@
-from display import Display
+from .display import Display
 from guizero import Slider
 from gpiozero import PWMLED
 
 
-class DisplayVent(Display):
+class Vent(Display):
     def __init__(self, app, path, image, gpio):
         self.fan = PWMLED(gpio)
         self. speed = 0

@@ -1,15 +1,15 @@
-from display import Display
+from .display import Display
 from guizero import Box, PushButton, Text
-from displaypayment import DisplayPayment
+from .payment import Payment
 
-class DisplayShoppingCard(Display):
+class ShoppingCard(Display):
     CONST_HOOKAH_PRICE = 1.50
     CONST_DRINK_PRICE = 1.00
     def __init__(self, app, path, image):
         self.hookah_sum = 0
         self.drink_sum = 0
         self.total = 0
-        self.display_payment = DisplayPayment(app, path, image)
+        self.display_payment = Payment(app, path, image)
         super().__init__(app, path, image, use_cancle_button=True, use_confirm_button=True)
 
     def generateComponents(self):

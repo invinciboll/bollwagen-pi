@@ -1,18 +1,17 @@
-from display import Display
+from .display import Display
 from guizero import Text, Drawing, Box, PushButton
-from rfid import Reader
-from repository import Database
-from displayhistory import DisplayHistory
+from interfaces.rfid import Reader
+from interfaces.repository import Database
+from .history import History
 import threading
 import time
 
-
-class DisplayBalance(Display):
+class Balance(Display):
     def __init__(self, app, path, image):
         self.stop = False
         self.db = Database("database.db")
         self.rfid = Reader()
-        self.display_history = DisplayHistory(app, path, image)
+        self.display_history = History(app, path, image)
         super().__init__(app, path, image, use_cancle_button=True, use_confirm_button=False)
 
     def generateComponents(self):

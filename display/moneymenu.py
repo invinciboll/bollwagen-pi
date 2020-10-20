@@ -1,16 +1,16 @@
-from display import Display
+from .display import Display
 from guizero import PushButton
-from displayshoppingcard import DisplayShoppingCard
-from displaybalance import DisplayBalance
-from displaycharge import DisplayCharge
+from .shoppingcard import ShoppingCard
+from .balance import Balance
+from .charge import Charge
 
 
-class DisplayMoneyMenu(Display):
+class MoneyMenu(Display):
     def __init__(self, app, path, image):
         self.displays = []
-        self.displays.append(DisplayShoppingCard(app, path, image))
-        self.displays.append(DisplayBalance(app, path, image))
-        self.displays.append(DisplayCharge(app, path, image))
+        self.displays.append(ShoppingCard(app, path, image))
+        self.displays.append(Balance(app, path, image))
+        self.displays.append(Charge(app, path, image))
         super().__init__(app, path, image, use_cancle_button=True, use_confirm_button=False)
 
     def generateComponents(self):

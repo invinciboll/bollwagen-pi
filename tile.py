@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from gpiozero import LED
 from guizero import PushButton
-from displayledcontrol import DisplayLedControl
-from displaymoneymenu import DisplayMoneyMenu
-from displayvent import DisplayVent
-from home import Home_Display
+from display.ledcontrol import LedControl
+from display.moneymenu import MoneyMenu
+from display.vent import Vent
+from display.home import Home_Display
 
 
 class Tile:
@@ -38,11 +38,11 @@ class MenuTile(Tile):
 
     def __init_display(self, app, path, image, gpio_list, menu_type):
         if menu_type is 'Led':
-            self.display = DisplayLedControl(
+            self.display = LedControl(
                 app, path, image, gpio_list[0], gpio_list[1], gpio_list[2])
         elif menu_type is 'MoneyMenu':
-            self.display = DisplayMoneyMenu(app, path, image)
+            self.display = MoneyMenu(app, path, image)
         elif menu_type is 'Vent':
-            self.display = DisplayVent(app, path, image, gpio_list[0])
+            self.display = Vent(app, path, image, gpio_list[0])
         elif menu_type is 'Bollwagen':
             self.display = Home_Display(app, path, image, gpio_list[0])

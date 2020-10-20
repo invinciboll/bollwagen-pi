@@ -3,7 +3,7 @@
 
 from guizero import App
 from tile import ToggleTile, MenuTile
-from home import Home_Display
+from display.home import Home_Display
 
 app = App(title="bollwagen", bg="black", layout="grid")
 path = '/home/pi/Desktop/bw/assets/img/'

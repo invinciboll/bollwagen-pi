@@ -1,12 +1,12 @@
-from display import Display
-from displaypaymethod import DisplayPayMethod
+from .display import Display
+from .paymethod import PayMethod
 from guizero import PushButton, Text, Box
 
 
-class DisplayCharge(Display):
+class Charge(Display):
     def __init__(self, app, path, image):
         self.amount = ""
-        self.display_pay_method = DisplayPayMethod(app, path, image)
+        self.display_pay_method = PayMethod(app, path, image)
         super().__init__(app, path, image, use_cancle_button=True, use_confirm_button=True)
 
     def generateComponents(self):

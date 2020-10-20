@@ -1,5 +1,5 @@
 import sqlite3
-from repository import Database
+from interfaces.repository import Database
 
 
 conn = sqlite3.connect("database.db")

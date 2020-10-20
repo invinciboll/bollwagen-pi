@@ -1,10 +1,10 @@
-from display import Display
+from .display import Display
 from guizero import Slider, Drawing
 from colormap import rgb2hex
 from gpiozero import PWMLED
 
 
-class DisplayLedControl(Display):
+class LedControl(Display):
     def __init__(self, app, path, image, gpioR, gpioG, gpioB):
         self.red = 0
         self.green = 0

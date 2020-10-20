@@ -1,10 +1,10 @@
-from display import Display
+from .display import Display
 from guizero import Text, Drawing, Box
-from repository import Database
+from interfaces.repository import Database
 from listentry import List_Entry
 
 
-class DisplayHistory(Display):
+class History(Display):
     def __init__(self, app, path, image):
         self.db = Database("database.db")
         super().__init__(app, path, image, use_cancle_button=True, use_confirm_button=False)

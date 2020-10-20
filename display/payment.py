@@ -1,12 +1,12 @@
-from display import Display
+from .display import Display
 from guizero import  Text ,Drawing
-from rfid import Reader
-from repository import Database
+from interfaces.rfid import Reader
+from interfaces.repository import Database
 import threading
 import time
 
 
-class DisplayPayment(Display):
+class Payment(Display):
     def __init__(self, app, path, image):
         self.stop = False
         self.db = Database("database.db")
