@@ -6,7 +6,7 @@ from tile import ToggleTile, MenuTile
 from home import Home_Display
 
 app = App(title="bollwagen", bg="black", layout="grid")
-path = '/home/pi/Desktop/bw/'
+path = '/home/pi/Desktop/bw/assets/img/'
 
 tiles = []
 tiles.append(ToggleTile(app, path, 'sign', [0, 0], 7))

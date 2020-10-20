@@ -101,7 +101,7 @@ class Database:
     def get_purchase_history(self, rfid):
         self.connect()
         self.c.execute(
-            f"SELECT timestamp, drinkSum, hookahSum FROM Purchase WHERE rfid={rfid} ORDER BY timestamp DESC LIMIT 5")
+            f"SELECT timestamp, drinkSum, hookahSum FROM Purchase WHERE rfid={rfid} ORDER BY timestamp DESC LIMIT 10")
         res = self.c.fetchall()
         self.close()
         return res

@@ -19,29 +19,32 @@ class DisplayBalance(Display):
         self.top_text = Text(self.window, text="Bitte Karte auflegen",
                              align="top", size=self.CONST_FONT_SIZE_GENERAL)
         self.top_text.text_color = "white"
-
-        self.statistics_name = Text(
-            self.window, align="top", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
-       
-
-        self.statistics_box = Box(
-                    self.window, width="fill", align="top")
-
-        self.statistic_box_drinks = Box(
-                    self.statistics_box, width="fill", align="top")
-        self.statistics_drinks = Text(
-            self.statistics_box, align="left", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
         
-        self.statistic_box_hookahs = Box(
-                    self.window, width="fill", align="top")
+        self.statistics_box = Box(
+                    self.window, width="fill", align="top", visible=False, height=120)
+        
+        self.statistics_name = Text(
+             self.statistics_box, align="top", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
+       
+        self.row_1 = Box(
+                    self.statistics_box, width="fill", align="top")
+        Text(self.row_1, align="left", text="Getränke:", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
+        self.statistics_drinks = Text(
+            self.row_1, align="right", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
+        
+        self.row_2 = Box(
+                    self.statistics_box, width="fill", align="top")
+        Text(self.row_2, align="left", text="Shisha-Köpfe:", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
         self.statistics_hookahs = Text(
-            self.statistic_box_hookahs, align="left", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
+            self.row_2, align="right", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
 
+        self.row_3 = Box(self.statistics_box, width="fill", align="top")
+        Text(self.row_3, align="left", text="Gesamtausgaben:", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
         self.statistics_expenses = Text(
-            self.window, align="top", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
+            self.row_3, align="right", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
 
         self.button_box = Box(
-            self.window, width="fill", align="top", layout="grid", height=50, border=True, visible=False)
+            self.window, width="fill", align="top", layout="grid", height=300, border=True, visible=False)
 
         self.b_w = PushButton(self.button_box, text="Woche", grid=[0, 0], width=12, args=['week'], command=self.get_statistic)
         self.b_w.text_color = "white"
@@ -94,27 +97,32 @@ class DisplayBalance(Display):
         self.statistics_name.value = f""
         self.statistics_drinks.value = f""
         self.statistics_hookahs.value = f""
-        self.statistics_expenses.visible = f""
+        self.statistics_expenses.value = f""
         self.top_text.text_color = "white"
         self.top_text.value = "Bitte Karte auflegen"
         self.top_text.size = self.CONST_FONT_SIZE_GENERAL
+        
+        self.statistics_box.visible = False
         self.order_history.visible = False
         self.button_box.visible = False
 
 
     def enable_buttons(self, sn):
+        self.statistics_box.visible = True
         self.button_box.visible = True
         self.sn = sn
         self.order_history.update_command(
             self.display_history.open, sn)
         self.order_history.visible = True
+        
+        self.get_statistic('week')
 
     def get_statistic(self, interval):
         res = self.db.get_statistic(self.sn, interval)
-        self.statistics_drinks.value = f"Getränke: {res[0]}"
-        self.statistics_hookahs.value = f"Shisha-Köpfe: {res[1]}"
+        self.statistics_drinks.value = f"{res[0]}"
+        self.statistics_hookahs.value = f"{res[1]}"
         expenses = res[0] * 1 + res[1] * 1.50
-        self.statistics_expenses.value = f"Gesamtausgaben: {expenses} €"
+        self.statistics_expenses.value = f"{expenses} €"
 
         self.b_l.bg="black"
         self.b_y.bg="black"
