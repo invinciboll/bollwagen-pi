@@ -4,7 +4,6 @@ from guizero import PushButton
 from display.ledcontrol import LedControl
 from display.moneymenu import MoneyMenu
 from display.vent import Vent
-from display.home import Home_Display
 
 
 class Tile:
@@ -44,5 +43,5 @@ class MenuTile(Tile):
             self.display = MoneyMenu(app, path, image)
         elif menu_type is 'Vent':
             self.display = Vent(app, path, image, gpio_list[0])
-        elif menu_type is 'Bollwagen':
-            self.display = Home_Display(app, path, image, gpio_list[0])
+       # elif menu_type is 'Bollwagen':
+          #  self.display = Home(app, path, image, gpio_list[0])

@@ -1,4 +1,4 @@
-from .display import Display
+from display.display import Display
 from guizero import Text, Box
 import Adafruit_DHT
 import time
