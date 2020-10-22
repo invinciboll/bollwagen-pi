@@ -20,12 +20,12 @@ class Welcome:
                           align="top", size=self.CONST_FONT_SIZE_GENERAL*6, color=self.CONST_TEXT_COLOR, font="Roboto Thin")
         
         #empty box for spacing
-        Box(self.window, align="top", height=40, border=True)
+        Box(self.window, align="top", width="fill", height=40, border=True)
 
         Picture(self.window, image=f"{path}{image}.png")
 
         #empty box for spacing
-        Box(self.window, align="top", height=80, border=True)
+        Box(self.window, align="top", width="fill",height=80, border=True)
         
         info_box = Box(self.window, align="top", layout="grid", border=True)
 
