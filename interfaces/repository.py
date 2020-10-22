@@ -19,6 +19,20 @@ class Database:
                        {'name': name, 'rfid': rfid})
         self.close()
 
+    def get_all_of_person(self):
+        self.connect()
+        self.c.execute("SELECT * FROM Person")
+        res = self.c.fetchall()
+        self.close()
+        return res
+
+    def get_all_of_purchase(self):
+        self.connect()
+        self.c.execute("SELECT * FROM Purchase")
+        res = self.c.fetchall()
+        self.close()
+        return res
+
     def getBalance(self, rfid):
         self.connect()
         self.c.execute("SELECT balance FROM Person WHERE rfid = :rfid",
