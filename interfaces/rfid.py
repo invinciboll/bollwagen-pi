@@ -11,4 +11,3 @@ class Reader:
     def getId(self):
         id = self.reader.read_id_no_block()
         return str(id)
-

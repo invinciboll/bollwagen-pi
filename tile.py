@@ -4,6 +4,7 @@ from guizero import PushButton
 from display.ledcontrol import LedControl
 from display.moneymenu import MoneyMenu
 from display.vent import Vent
+from display.effect import Effect
 
 
 class Tile:
@@ -31,7 +32,7 @@ class ToggleTile(Tile):
 
 
 class MenuTile(Tile):
-    def __init__(self, app, path, image, grid, gpio_list, menu_type, ):
+    def __init__(self, app, path, image, grid, gpio_list, menu_type):
         self.__init_display(app, path, image, gpio_list, menu_type)
         super().__init__(app, path, image, grid, self.display.open)
 
@@ -43,5 +44,8 @@ class MenuTile(Tile):
             self.display = MoneyMenu(app, path, image)
         elif menu_type is 'Vent':
             self.display = Vent(app, path, image, gpio_list[0])
+        elif menu_type is 'Effect':
+            self.display = Effect(app, path, image)
+
        # elif menu_type is 'Bollwagen':
           #  self.display = Home(app, path, image, gpio_list[0])
