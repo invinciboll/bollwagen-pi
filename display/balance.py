@@ -6,6 +6,7 @@ from .history import History
 import threading
 import time
 
+
 class Balance(Display):
     def __init__(self, app, path, image):
         self.stop = False
@@ -18,44 +19,50 @@ class Balance(Display):
         self.top_text = Text(self.window, text="Bitte Karte auflegen",
                              align="top", size=self.CONST_FONT_SIZE_GENERAL)
         self.top_text.text_color = "white"
-        
+
         self.statistics_box = Box(
-                    self.window, width="fill", align="top", visible=False, height=120)
-        
+            self.window, width="fill", align="top", visible=False, height=120)
+
         self.statistics_name = Text(
-             self.statistics_box, align="top", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
-       
+            self.statistics_box, align="top", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
+
         self.row_1 = Box(
-                    self.statistics_box, width="fill", align="top")
-        Text(self.row_1, align="left", text="Getränke:", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
+            self.statistics_box, width="fill", align="top")
+        Text(self.row_1, align="left", text="Getränke:",
+             size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
         self.statistics_drinks = Text(
             self.row_1, align="right", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
-        
+
         self.row_2 = Box(
-                    self.statistics_box, width="fill", align="top")
-        Text(self.row_2, align="left", text="Shisha-Köpfe:", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
+            self.statistics_box, width="fill", align="top")
+        Text(self.row_2, align="left", text="Shisha-Köpfe:",
+             size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
         self.statistics_hookahs = Text(
             self.row_2, align="right", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
 
         self.row_3 = Box(self.statistics_box, width="fill", align="top")
-        Text(self.row_3, align="left", text="Gesamtausgaben:", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
+        Text(self.row_3, align="left", text="Gesamtausgaben:",
+             size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
         self.statistics_expenses = Text(
             self.row_3, align="right", size=self.CONST_FONT_SIZE_GENERAL, color=self.CONST_TEXT_COLOR)
 
         self.button_box = Box(
             self.window, width="fill", align="top", layout="grid", height=300, border=True, visible=False)
 
-        self.b_w = PushButton(self.button_box, text="Woche", grid=[0, 0], width=12, args=['week'], command=self.get_statistic)
+        self.b_w = PushButton(self.button_box, text="Woche", grid=[
+                              0, 0], width=12, args=['week'], command=self.get_statistic)
         self.b_w.text_color = "white"
 
-        self.b_m = PushButton(self.button_box, text="Monat", grid=[1, 0],  width=12, args=['month'], command=self.get_statistic)
+        self.b_m = PushButton(self.button_box, text="Monat", grid=[
+                              1, 0],  width=12, args=['month'], command=self.get_statistic)
         self.b_m.text_color = "white"
 
-        self.b_y = PushButton(self.button_box, text="Jahr", grid=[2, 0],  width=12, args=['year'], command=self.get_statistic)
+        self.b_y = PushButton(self.button_box, text="Jahr", grid=[
+                              2, 0],  width=12, args=['year'], command=self.get_statistic)
         self.b_y.text_color = "white"
 
         self.b_l = PushButton(self.button_box, text="Gesamt",
-                         grid=[3, 0],  width=12, args=['lifetime'], command=self.get_statistic)
+                              grid=[3, 0],  width=12, args=['lifetime'], command=self.get_statistic)
         self.b_l.text_color = "white"
 
         self.order_history = PushButton(
@@ -100,11 +107,10 @@ class Balance(Display):
         self.top_text.text_color = "white"
         self.top_text.value = "Bitte Karte auflegen"
         self.top_text.size = self.CONST_FONT_SIZE_GENERAL
-        
+
         self.statistics_box.visible = False
         self.order_history.visible = False
         self.button_box.visible = False
-
 
     def enable_buttons(self, sn):
         self.statistics_box.visible = True
@@ -113,20 +119,31 @@ class Balance(Display):
         self.order_history.update_command(
             self.display_history.open, sn)
         self.order_history.visible = True
-        
+
         self.get_statistic('week')
 
     def get_statistic(self, interval):
         res = self.db.get_statistic(self.sn, interval)
-        self.statistics_drinks.value = f"{res[0]}"
-        self.statistics_hookahs.value = f"{res[1]}"
-        expenses = res[0] * 1 + res[1] * 1.50
+
+        if(res[0] is None):
+            d_val = 0
+        else:
+            d_val = res[0]
+
+        if(res[1] is None):
+            h_val = 0
+        else:
+            h_val = res[1]
+
+        self.statistics_drinks.value = f"{d_val}"
+        self.statistics_hookahs.value = f"{h_val}"
+        expenses = d_val * 1 + h_val * 1.50
         self.statistics_expenses.value = f"{expenses} €"
 
-        self.b_l.bg="black"
-        self.b_y.bg="black"
-        self.b_m.bg="black"
-        self.b_w.bg="black"
+        self.b_l.bg = "black"
+        self.b_y.bg = "black"
+        self.b_m.bg = "black"
+        self.b_w.bg = "black"
 
         if interval == 'lifetime':
             self.b_l.bg = "blue"
@@ -136,5 +153,3 @@ class Balance(Display):
             self.b_m.bg = "blue"
         elif interval == 'week':
             self.b_w.bg = "blue"
-
-        
