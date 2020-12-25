@@ -71,7 +71,7 @@ class Balance(Display):
 
     def open(self, *args):
         self.window.show()
-        tr = threading.Thread(target=self.startScanProcess)
+        tr = threading.Thread(target=self.start_scan_process)
         tr.start()
 
     def confirm(self):
@@ -81,7 +81,7 @@ class Balance(Display):
     def cancle(self):
         self.stop = True
 
-    def startScanProcess(self):
+    def start_scan_process(self):
         self.stop = False
         while (not self.stop):
             sn = self.rfid.getId()
