@@ -11,6 +11,25 @@ class History(Display):
 
     def open(self, *args):
         self.window.show()
+
+        self.master = Box(self.window, width="fill", height="60",
+                          layout="auto", border=True)
+
+        Text(self.master, text=f"Zeitpunkt", size=self.CONST_FONT_SIZE_GENERAL,
+             color=self.CONST_TEXT_COLOR, align="left")
+
+        box = Box(self.master, width="160", height="60",
+                  layout="grid", border=True, align="right")
+
+        Text(box, text=f"Getränke", size=self.CONST_FONT_SIZE_GENERAL,
+             color=self.CONST_TEXT_COLOR, grid=[1, 0], width=8)
+
+        Text(box, text=f"Köpfe", size=self.CONST_FONT_SIZE_GENERAL,
+             color=self.CONST_TEXT_COLOR, grid=[2, 0], width=4)
+
+        Text(box, text=f"Total", size=self.CONST_FONT_SIZE_GENERAL,
+             color=self.CONST_TEXT_COLOR, grid=[3, 0], width=5)
+
         sn = "".join(args)
         purchases = self.db.get_purchase_history(sn)
         self.list_entries = []
