@@ -47,4 +47,7 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+
 db_helper.py
+
+.vscode/
